@@ -1,4 +1,4 @@
-# [AoC-2023][aoc-2023]
+# [AoC][aoc-plain-bagel]
 
 ![](./assets/aoc_cover-512x512.jpeg)
 
@@ -10,7 +10,7 @@
 
 🥯플레인베이글 [Advent of Code][aoc-official] 🎄챌린지 기록을 위한 저장소 입니다.
 
-보통이라면 어드밴트 캘린더를 하나 사서 가족이랑 매일 각 날짜 속에 숨겨진 작은 초콜릿 🍫하나 먹으며 성탄절을 맞이하겠지만, 베이글러는 다릅니다! [Eric Wastl][eric-wastl]님이 2015년부터 매년 직접 혼자 준비해주시는 크리스마스의 센세이션 [*Advent of Code*][aoc-official]를 2023년에 재밌게 진행합니다! :tada:
+보통이라면 어드밴트 캘린더를 하나 사서 가족이랑 매일 각 날짜 속에 숨겨진 작은 초콜릿 🍫하나 먹으며 성탄절을 맞이하겠지만, 베이글러는 다릅니다! [Eric Wastl][eric-wastl]님이 2015년부터 매년 직접 혼자 준비해주시는 크리스마스의 센세이션 [*Advent of Code*][aoc-official]를 2024년에도 재밌게 진행합니다! :tada:
 
 > [!NOTE]
 > Advent of Code란?
@@ -32,9 +32,9 @@ MIT 라이센스를 준수합니다. [LICENSE](LICENSE)에서 자세한 정보�
 
 ## Contact
 
-- [slack/plain-bagel/aoc-2023](https://plainbagel.slack.com/archives/C067RSCDC78)
+- [slack/plain-bagel/aoc](https://plainbagel.slack.com/archives/C067RSCDC78)
 
-[aoc-2023]: https://github.com/plain-bagel/AoC-2023
+[aoc-plain-bagel]: https://github.com/plain-bagel/AoC-2023
 
 [aoc-official]: https://adventofcode.com
 
