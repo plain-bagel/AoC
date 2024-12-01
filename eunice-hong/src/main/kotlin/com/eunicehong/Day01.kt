@@ -60,8 +60,7 @@ internal class Day01 {
             leftIds
                 .sorted()
                 .zip(rightIds.sorted())
-                .map { abs(it.first - it.second) }
-                .reduce { acc, distance -> acc + distance }
+                .sumOf { abs(it.first - it.second) }
         return totalDistance.toString()
     }
 
@@ -101,10 +100,12 @@ internal class Day01 {
      */
     fun solution2(puzzle: String): String {
         val (leftIds, rightIds) = parseIds(puzzle)
+        val leftIdCounts = leftIds.groupingBy { it }.eachCount()
+        val rightIdCounts = rightIds.groupingBy { it }.eachCount()
         val totalDistance =
-            leftIds
-                .map { leftId -> leftId * rightIds.count { rightId -> leftId == rightId } }
-                .reduce { acc, distance -> acc + distance }
+            leftIdCounts
+                .map { leftId -> leftId.key * leftId.value * rightIdCounts.getOrDefault(leftId.key, 0) }
+                .sum()
         return totalDistance.toString()
     }
 
