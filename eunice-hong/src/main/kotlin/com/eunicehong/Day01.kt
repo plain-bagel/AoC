@@ -1,5 +1,7 @@
 package com.eunicehong
 
+import kotlin.math.abs
+
 /**
  * # 2024 Day 1: Historian Hysteria
  *
@@ -53,8 +55,20 @@ internal class Day01 {
      * Your actual left and right lists contain many location IDs. What is the total distance between your lists?
      */
     fun solution1(puzzle: String): String {
-        val lines = puzzle.lines().filter { it.isNotEmpty() }
-        return ""
+        val ids =
+            puzzle
+                .lines()
+                .map { it.split("   ") }
+                .flatten()
+                .mapNotNull { it.toIntOrNull() }
+        val leftIds = ids.filterIndexed { index, _ -> index % 2 == 0 }.sorted()
+        val rightIds = ids.filterIndexed { index, _ -> index % 2 == 1 }.sorted()
+        val totalDistance =
+            leftIds
+                .zip(rightIds)
+                .map { abs(it.first - it.second) }
+                .reduce { acc, distance -> acc + distance }
+        return totalDistance.toString()
     }
 
     /**
