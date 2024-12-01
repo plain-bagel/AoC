@@ -55,17 +55,11 @@ internal class Day01 {
      * Your actual left and right lists contain many location IDs. What is the total distance between your lists?
      */
     fun solution1(puzzle: String): String {
-        val ids =
-            puzzle
-                .lines()
-                .map { it.split("   ") }
-                .flatten()
-                .mapNotNull { it.toIntOrNull() }
-        val leftIds = ids.filterIndexed { index, _ -> index % 2 == 0 }.sorted()
-        val rightIds = ids.filterIndexed { index, _ -> index % 2 == 1 }.sorted()
+        val (leftIds, rightIds) = parseIds(puzzle)
         val totalDistance =
             leftIds
-                .zip(rightIds)
+                .sorted()
+                .zip(rightIds.sorted())
                 .map { abs(it.first - it.second) }
                 .reduce { acc, distance -> acc + distance }
         return totalDistance.toString()
@@ -106,18 +100,31 @@ internal class Day01 {
      * Once again consider your left and right lists. What is their similarity score?
      */
     fun solution2(puzzle: String): String {
-        val ids =
-            puzzle
-                .lines()
-                .map { it.split("   ") }
-                .flatten()
-                .mapNotNull { it.toIntOrNull() }
-        val leftIds = ids.filterIndexed { index, _ -> index % 2 == 0 }.sorted()
-        val rightIds = ids.filterIndexed { index, _ -> index % 2 == 1 }.sorted()
+        val (leftIds, rightIds) = parseIds(puzzle)
         val totalDistance =
             leftIds
                 .map { leftId -> leftId * rightIds.count { rightId -> leftId == rightId } }
                 .reduce { acc, distance -> acc + distance }
         return totalDistance.toString()
     }
+
+    /**
+     * Parse the IDs from the puzzle input.
+     *
+     * @param puzzle The puzzle input.
+     *
+     * @return A pair of lists of IDs.
+     * The first list contains the IDs from the left side of the puzzle input,
+     * and the second list contains the IDs from the right side of the puzzle input.
+     */
+    private fun parseIds(puzzle: String) =
+        puzzle
+            .lines()
+            .map { it.split("   ") }
+            .flatten()
+            .withIndex()
+            .partition { id -> id.index % 2 == 0 }
+            .let { pair ->
+                pair.first.map { it.value.toInt() } to pair.second.map { it.value.toInt() }
+            }
 }
