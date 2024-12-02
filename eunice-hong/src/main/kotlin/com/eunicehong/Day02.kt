@@ -55,8 +55,7 @@ internal class Day02 {
      */
     fun solution1(puzzle: String) =
         puzzle
-            .lines()
-            .map { it.split(" ").map { level -> level.toInt() } }
+            .parseInput()
             .count(::isReportValid)
             .toString()
 
@@ -90,8 +89,7 @@ internal class Day02 {
      */
     fun solution2(puzzle: String) =
         puzzle
-            .lines()
-            .map { it.split(" ").map { level -> level.toInt() } }
+            .parseInput()
             .count(::isReportValidWithTolerance)
             .toString()
 }
@@ -122,3 +120,17 @@ private fun isReportValid(report: List<Int>): Boolean {
     val isChangeSmall = diffs.all { it in 1..3 }
     return (isIncreasing || isDecreasing) && isChangeSmall
 }
+
+/**
+ * Parse the input.
+ *
+ * @return The parsed input.
+ */
+private fun String.parseInput() =
+    this
+        .split("\n")
+        .map { report ->
+            report
+                .split(" ")
+                .map { level -> level.toInt() }
+        }
