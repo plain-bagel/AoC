@@ -1,5 +1,7 @@
 package com.eunicehong
 
+import kotlin.math.abs
+
 /**
  * # 2024 Day 2: Red-Nosed Reports
  *
@@ -46,10 +48,12 @@ internal class Day02 {
      *
      * Analyze the unusual data from the engineers. How many reports are safe?
      */
-    fun solution1(puzzle: String): String {
-        val lines = puzzle.lines().filter { it.isNotEmpty() }
-        return ""
-    }
+    fun solution1(puzzle: String) =
+        puzzle
+            .lines()
+            .map { it.split(" ").map { level -> level.toInt() } }
+            .count(::isReportValid)
+            .toString()
 
     /**
      * ## Part 2
@@ -59,4 +63,19 @@ internal class Day02 {
         val lines = puzzle.lines().filter { it.isNotEmpty() }
         return ""
     }
+}
+
+/**
+ * Check if the report is valid.
+ *
+ * @param report The report to check.
+ *
+ * @return `true` if the report is valid, `false` otherwise.
+ */
+private fun isReportValid(report: List<Int>): Boolean {
+    val diffs = report.windowed(2).map { abs(it[1] - it[0]) }
+    val isIncreasing = report == report.sorted()
+    val isDecreasing = report == report.sortedDescending()
+    val isChangeSmall = diffs.all { it in 1..3 }
+    return (isIncreasing || isDecreasing) && isChangeSmall
 }
