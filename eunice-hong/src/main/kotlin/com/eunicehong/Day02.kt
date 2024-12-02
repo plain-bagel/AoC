@@ -117,8 +117,8 @@ private fun isReportValidWithTolerance(report: List<Int>): Boolean =
  */
 private fun isReportValid(report: List<Int>): Boolean {
     val diffs = report.windowed(2).map { abs(it[1] - it[0]) }
-    val isIncreasing = report == report.sorted()
-    val isDecreasing = report == report.sortedDescending()
+    val isIncreasing = report.zipWithNext().all { it.first < it.second }
+    val isDecreasing = report.zipWithNext().all { it.first > it.second }
     val isChangeSmall = diffs.all { it in 1..3 }
     return (isIncreasing || isDecreasing) && isChangeSmall
 }
