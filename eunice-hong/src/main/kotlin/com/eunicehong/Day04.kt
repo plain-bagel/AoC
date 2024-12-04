@@ -57,8 +57,34 @@ internal class Day04 {
      * Take a look at the little Elf's word search. How many times does `XMAS` appear?
      */
     fun solution1(puzzle: String): String {
-        val lines = puzzle.lines().filter { it.isNotEmpty() }
-        return ""
+        val lines = puzzle.lines()
+        return (0 until lines.size * lines[0].length)
+            .sumOf { index ->
+                val x = index % lines.size
+                val y = index / lines.size
+
+                // Check if it can visit X from the current position
+                if (lines[y][x] != 'X') return@sumOf 0
+
+                // Check if it can visit M
+                lines
+                    .canVisit(x, y, 'M')
+                    .filter { (direction, mx, my) ->
+
+                        // Check if it can visit A from M in the same direction
+                        lines
+                            .canVisit(direction, mx, my, 'A')
+                            ?.takeIf { triple -> triple.first == direction }
+                            ?.let { (_, ax, ay) ->
+
+                                // Check if it can visit S from A in the same direction
+                                lines
+                                    .canVisit(direction, ax, ay, 'S')
+                                    ?.takeIf { triple -> triple.first == direction } ?: return@filter false
+                                true
+                            } ?: false
+                    }.count()
+            }.toString()
     }
 
     /**
@@ -68,5 +94,48 @@ internal class Day04 {
     fun solution2(puzzle: String): String {
         val lines = puzzle.lines().filter { it.isNotEmpty() }
         return ""
+    }
+
+    private fun List<String>.canVisit(
+        x: Int,
+        y: Int,
+        char: Char,
+    ): List<Triple<Direction, Int, Int>> =
+        Direction.entries.mapNotNull { direction ->
+            this.canVisit(direction, x, y, char)
+        }
+
+    private fun List<String>.canVisit(
+        direction: Direction,
+        x: Int,
+        y: Int,
+        char: Char,
+    ): Triple<Direction, Int, Int>? {
+        val i = direction.value
+        val yToVisit = (y - 1 + i / 3).takeIf { it in indices } ?: return null
+        val xToVisit = (x - 1 + i % 3).takeIf { it in this[yToVisit].indices } ?: return null
+        return if (this[yToVisit][xToVisit].equals(char, ignoreCase = true)) {
+            Triple(Direction.fromValue(i), xToVisit, yToVisit)
+        } else {
+            null
+        }
+    }
+}
+
+enum class Direction(
+    val value: Int,
+) {
+    UP_LEFT(0),
+    UP(1),
+    UP_RIGHT(2),
+    LEFT(3),
+    RIGHT(5),
+    DOWN_LEFT(6),
+    DOWN(7),
+    DOWN_RIGHT(8),
+    ;
+
+    companion object {
+        fun fromValue(value: Int): Direction = entries.first { it.value == value }
     }
 }
