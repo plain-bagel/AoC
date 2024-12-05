@@ -1,0 +1,34 @@
+# p1
+
+## Section
+
+```elixir
+file_path = System.get_env("AOC_PATH") <> "p1_input.txt"
+file = File.read!(file_path)
+```
+
+```elixir
+{list1, list2} =
+  file
+  |> String.split()
+  |> Enum.map(&String.to_integer/1)
+  |> Enum.chunk_every(2)
+  |> Enum.map(fn [a, b] -> {a, b} end)
+  |> Enum.unzip()
+```
+
+```elixir
+list1 = Enum.sort(list1)
+list2 = Enum.sort(list2)
+
+[list1, list2]
+|> Enum.zip_with(fn [a, b] -> abs(a - b) end)
+|> Enum.sum()
+```
+
+```elixir
+Enum.reduce(list1, 0, fn x, acc ->
+  count = Enum.count(list2, &(&1 == x))
+  acc + x * count
+end)
+```
