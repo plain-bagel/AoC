@@ -19,7 +19,7 @@ internal class Day04Test : DailyTest(4) {
 
     @Test
     override fun puzzleSolution2() {
-        val expected = "Not implemented"
+        val expected = "2003"
         val actual = testDay04.solution2(input)
         assertEquals(expected, actual, "🎅 Solution for Puzzle 2 Day $dayString has not been implemented yet.")
         println("🌲 Day $dayString Puzzle 2 completed! $actual")
