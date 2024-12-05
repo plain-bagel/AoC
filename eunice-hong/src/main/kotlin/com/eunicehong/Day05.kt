@@ -93,8 +93,29 @@ internal class Day05 {
      *
      */
     fun solution1(puzzle: String): String {
-        val lines = puzzle.lines().filter { it.isNotEmpty() }
-        return ""
+        val (pageOrderingRule, pageToUpdate) =
+            puzzle
+                .split("\n\n")
+                .map { it.lines() }
+                .filter { it.isNotEmpty() }
+                .let { it ->
+                    val rules = it[0].map { rules -> rules.split("|").map { it.toInt() }.let { it[0] to it[1] } }
+                    val pages = it[1].map { pages -> pages.split(",").map { it.toInt() } }
+                    Pair(rules, pages)
+                }
+
+        return pageToUpdate
+            .filter { line ->
+                (0..line.lastIndex).all { index ->
+                    val before = line.subList(0, index)
+                    val after = line.subList(index + 1, line.size)
+                    val shouldBeBefore = pageOrderingRule.filter { it.second == line[index] }.map { it.first }
+                    val shouldBeAfter = pageOrderingRule.filter { it.first == line[index] }.map { it.second }
+                    !(before.any { it in shouldBeAfter } || after.any { it in shouldBeBefore })
+                }
+            }.sumOf { line ->
+                line[line.lastIndex / 2]
+            }.toString()
     }
 
     /**
