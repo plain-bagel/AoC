@@ -118,8 +118,20 @@ internal class Day06 {
      *
      */
     fun solution1(puzzle: String): String {
-        val lines = puzzle.lines().filter { it.isNotEmpty() }
-        return ""
+        var lines = puzzle.lines().filter { it.isNotEmpty() }
+        val puzzleWidth = lines.first().length
+        val puzzleHeight = lines.size
+        val guardPosition = lines.getPositionOf(CHAR_GUARD).first()
+        val obstructions = lines.getPositionOf(CHAR_OBSTRUCTION).map(::Obstruction)
+        var guard = Guard(guardPosition, Direction.UP)
+        do {
+            val obstruction = guard.getFirstObstruction(puzzleWidth to puzzleHeight, obstructions)
+            lines = lines.visit(guard, obstruction)
+//            lines.map(::println)
+//            println("\n")
+            guard = guard.nextPosition(obstruction)
+        } while (obstruction.x in 0 until puzzleWidth && obstruction.y in 0 until puzzleHeight)
+        return lines.joinToString("").count { it.equals(CHAR_VISITED, ignoreCase = true) }.toString()
     }
 
     /**
@@ -129,5 +141,108 @@ internal class Day06 {
     fun solution2(puzzle: String): String {
         val lines = puzzle.lines().filter { it.isNotEmpty() }
         return ""
+    }
+
+    /**
+     * Get the first obstruction in the guard's path.
+     */
+    private fun Guard.getFirstObstruction(
+        size: Pair<Int, Int>,
+        obstructions: List<Obstruction>,
+    ): Obstruction =
+        when (direction) {
+            Direction.UP ->
+                obstructions
+                    .filter { obstruction ->
+                        x == obstruction.x && obstruction.y < y
+                    }.maxByOrNull { it.y } ?: Obstruction(x to -1)
+            Direction.RIGHT ->
+                obstructions
+                    .filter { obstruction ->
+                        y == obstruction.y && x < obstruction.x
+                    }.minByOrNull { it.x } ?: Obstruction(size.first to y)
+            Direction.DOWN ->
+                obstructions
+                    .filter { obstruction ->
+                        x == obstruction.x && y < obstruction.y
+                    }.minByOrNull { it.y } ?: Obstruction(x to size.second)
+            Direction.LEFT ->
+                obstructions
+                    .filter { obstruction ->
+                        y == obstruction.y && obstruction.x < x
+                    }.maxByOrNull { it.x } ?: Obstruction(-1 to y)
+        }
+
+    private fun List<String>.getPositionOf(char: Char): List<Pair<Int, Int>> {
+        val totalCharCount = size * first().length
+        return (0 until totalCharCount)
+            .map { number ->
+                number % first().length to number / first().length
+            }.filter { (x, y) ->
+                get(y)[x] == char
+            }
+    }
+
+    /**
+     * Mark 'X' on the map where the guard has visited.
+     */
+    private fun List<String>.visit(
+        guard: Guard,
+        obstruction: Obstruction,
+    ): List<String> =
+        mapIndexed { y, line ->
+            line
+                .mapIndexed { x, char ->
+                    when (guard.direction) {
+                        Direction.UP ->
+                            if (x == guard.x && y in obstruction.y + 1..guard.y) CHAR_VISITED else char
+                        Direction.RIGHT ->
+                            if (y == guard.y && x in guard.x until obstruction.x) CHAR_VISITED else char
+                        Direction.DOWN ->
+                            if (x == guard.x && y in guard.y + 1 until obstruction.y) CHAR_VISITED else char
+                        Direction.LEFT ->
+                            if (y == guard.y && x in obstruction.x + 1..guard.x) CHAR_VISITED else char
+                    }
+                }.joinToString("")
+        }
+
+    private data class Guard(
+        private val position: Pair<Int, Int>,
+        val direction: Direction,
+    ) : Object(position) {
+        fun nextPosition(obstruction: Obstruction): Guard =
+            when (direction) {
+                Direction.UP -> Guard(position = x to obstruction.y + 1, direction = Direction.RIGHT)
+                Direction.RIGHT -> Guard(position = obstruction.x - 1 to y, direction = Direction.DOWN)
+                Direction.DOWN -> Guard(position = x to obstruction.y - 1, direction = Direction.LEFT)
+                Direction.LEFT -> Guard(position = obstruction.x + 1 to y, direction = Direction.UP)
+            }
+    }
+
+    private data class Obstruction(
+        val position: Pair<Int, Int>,
+    ) : Object(position)
+
+    private abstract class Object(
+        position: Pair<Int, Int>,
+    ) {
+        val x = position.first
+        val y = position.second
+    }
+
+    private enum class Direction {
+        UP,
+        RIGHT,
+        DOWN,
+        LEFT,
+    }
+
+    companion object {
+        private const val CHAR_GUARD = '^'
+        private const val CHAR_OBSTRUCTION = '#'
+        private const val CHAR_VISITED = 'X'
+        private const val CHAR_PATH_VERTICAL = '|'
+        private const val CHAR_PATH_HORIZONTAL = '-'
+        private const val CHAR_PATH_BOTH = '+'
     }
 }
