@@ -75,7 +75,15 @@ internal class Day07 {
      */
     fun solution2(puzzle: String): String {
         val lines = puzzle.lines().filter { it.isNotEmpty() }
-        return ""
+        return lines
+            .map(::toEquation)
+            .filter { equation: Equation ->
+                solveEquation2(equation.numbers)
+                    .any {
+                        it == equation.testValue
+                    }
+            }.sumOf { it.testValue }
+            .toString()
     }
 
     private fun solveEquation(param: List<Long>): List<Long> {
@@ -85,6 +93,20 @@ internal class Day07 {
             val plus = listOf(param[0] + param[1]) + param.subList(2, param.size)
             val multiply = listOf(param[0] * param[1]) + param.subList(2, param.size)
             return listOf(plus, multiply).flatMap(::solveEquation)
+        }
+    }
+
+    private fun solveEquation2(param: List<Long>): List<Long> {
+        if (param.size == 2) {
+            val (first, second) = param
+            return listOf(first + second, first * second, "$first$second".toLong())
+        } else {
+            val first = param[0]
+            val second = param[1]
+            val plus = listOf(first + second) + param.subList(2, param.size)
+            val multiply = listOf(first * second) + param.subList(2, param.size)
+            val concat = listOf("$first$second".toLong()) + param.subList(2, param.size)
+            return listOf(plus, multiply, concat).flatMap(::solveEquation2)
         }
     }
 
