@@ -46,15 +46,55 @@ internal class Day07 {
      */
     fun solution1(puzzle: String): String {
         val lines = puzzle.lines().filter { it.isNotEmpty() }
-        return ""
+        return lines
+            .map(::toEquation)
+            .filter { equation: Equation ->
+                solveEquation(equation.numbers)
+                    .any {
+                        it == equation.testValue
+                    }
+            }.sumOf { it.testValue }
+            .toString()
     }
 
     /**
      * ## Part 2
      *
+     * The engineers seem concerned; the total calibration result you gave them is nowhere close to being within safety tolerances. Just then, you spot your mistake: some well-hidden elephants are holding a third type of operator.
+     *
+     * The concatenation operator (||) combines the digits from its left and right inputs into a single number. For example, 12 || 345 would become 12345. All operators are still evaluated left-to-right.
+     *
+     * Now, apart from the three equations that could be made true using only addition and multiplication, the above example has three more equations that can be made true by inserting operators:
+     *
+     * 156: 15 6 can be made true through a single concatenation: 15 || 6 = 156.
+     * 7290: 6 8 6 15 can be made true using 6 * 8 || 6 * 15.
+     * 192: 17 8 14 can be made true using 17 || 8 + 14.
+     * Adding up all six test values (the three that could be made before using only + and * plus the new three that can now be made by also using ||) produces the new total calibration result of 11387.
+     *
+     * Using your new knowledge of elephant hiding spots, determine which equations could possibly be true. What is their total calibration result?
      */
     fun solution2(puzzle: String): String {
         val lines = puzzle.lines().filter { it.isNotEmpty() }
         return ""
     }
+
+    private fun solveEquation(param: List<Long>): List<Long> {
+        if (param.size == 2) {
+            return listOf(param.first() + param.last(), param.first() * param.last())
+        } else {
+            val plus = listOf(param[0] + param[1]) + param.subList(2, param.size)
+            val multiply = listOf(param[0] * param[1]) + param.subList(2, param.size)
+            return listOf(plus, multiply).flatMap(::solveEquation)
+        }
+    }
+
+    private fun toEquation(line: String): Equation {
+        val (testValue, numbers) = line.split(":")
+        return Equation(testValue.toLong(), numbers.split(" ").filter { it.isNotEmpty() }.map { it.toLong() })
+    }
+
+    private data class Equation(
+        val testValue: Long,
+        val numbers: List<Long>,
+    )
 }
