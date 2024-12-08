@@ -101,15 +101,115 @@ internal class Day08 {
      */
     fun solution1(puzzle: String): String {
         val lines = puzzle.lines().filter { it.isNotEmpty() }
-        return ""
+        val antennas = lines.getAntennas()
+        return antennas
+            .asSequence()
+            .flatMap { antenna -> antenna.getAntiNodes(antennas) }
+            .filter { antiNode -> lines.isValid(antiNode) }
+            .distinct()
+            .count()
+            .toString()
     }
 
     /**
      * ## Part 2
      *
+     * Watching over your shoulder as you work, one of The Historians asks if you took the effects of resonant harmonics into your calculations.
+     *
+     * Whoops!
+     *
+     * After updating your model, it turns out that an antinode occurs at any grid position exactly in line with at least two antennas of the same frequency, regardless of distance. This means that some of the new antinodes will occur at the position of each antenna (unless that antenna is the only one of its frequency).
+     *
+     * So, these three T-frequency antennas now create many antinodes:
+     *
+     * ```
+     * T....#....
+     * ...T......
+     * .T....#...
+     * .........#
+     * ..#.......
+     * ..........
+     * ...#......
+     * ..........
+     * ....#.....
+     * ..........
+     * ```
+     * In fact, the three T-frequency antennas are all exactly in line with two antennas, so they are all also antinodes! This brings the total number of antinodes in the above example to 9.
+     *
+     * The original example now has 34 antinodes, including the antinodes that appear on every antenna:
+     *
+     * ```
+     * ##....#....#
+     * .#.#....0...
+     * ..#.#0....#.
+     * ..##...0....
+     * ....0....#..
+     * .#...#A....#
+     * ...#..#.....
+     * #....#.#....
+     * ..#.....A...
+     * ....#....A..
+     * .#........#.
+     * ...#......##
+     * ```
+     * Calculate the impact of the signal using this updated model. How many unique locations within the bounds of the map contain an antinode?
      */
     fun solution2(puzzle: String): String {
         val lines = puzzle.lines().filter { it.isNotEmpty() }
         return ""
+    }
+
+    private fun List<String>.getAntennas(): List<Antenna> =
+        (0 until size * get(0).length).mapNotNull {
+            val x = it % size
+            val y = it / size
+            when (get(y)[x]) {
+                in 'A'..'Z',
+                in 'a'..'z',
+                in '0'..'9',
+                -> Antenna(Pair(x, y), get(y)[x])
+                else -> null
+            }
+        }
+
+    private fun List<String>.isValid(antiNode: AntiNode) = antiNode.x in 0 until get(0).length && antiNode.y in indices
+
+    private data class AntiNode(
+        private val position: Pair<Int, Int>,
+        val frequency: Char,
+    ) : Object(position) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is AntiNode) return false
+            return x == other.x && y == other.y
+        }
+
+        override fun hashCode(): Int {
+            var result = x
+            result = 32 * result + y
+            return result
+        }
+    }
+
+    private data class Antenna(
+        private val position: Pair<Int, Int>,
+        val frequency: Char,
+    ) : Object(position) {
+        fun getAntiNodes(antennas: List<Antenna>): List<AntiNode> =
+            antennas
+                .filter { antenna -> antenna.frequency == frequency && antenna != this }
+                .flatMap { antenna ->
+                    listOf(
+                        AntiNode(Pair(2 * x - antenna.x, 2 * y - antenna.y), frequency),
+                        AntiNode(Pair(2 * antenna.x - x, 2 * antenna.y - y), frequency),
+                    )
+                }
+    }
+
+    private abstract class Object(
+        position: Pair<Int, Int>,
+    ) {
+        val x: Int = position.first
+        val y: Int = position.second
     }
 }
