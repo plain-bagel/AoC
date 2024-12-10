@@ -10,6 +10,15 @@ internal class Day09Test : DailyTest(9) {
     private val testDay09: Day09 = Day09()
 
     @Test
+     fun puzzleSolution1Example() {
+         val exampleInput = "2333133121414131402"
+        val expected = "1928"
+        val actual = testDay09.solution1(exampleInput)
+        assertEquals(expected, actual, "🎅 Solution for Example 1 Day $dayString has not been implemented yet.")
+        println("🌲 Day $dayString Example 1 completed! $actual")
+    }
+
+    @Test
     override fun puzzleSolution1() {
         val expected = "Not implemented"
         val actual = testDay09.solution1(input)
