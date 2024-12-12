@@ -71,7 +71,7 @@ internal class Day11 {
     fun solution1(puzzle: String): String {
         return puzzle
             .split(" ").map { it.toLong() }
-            .blinks().count().toString()
+            .blinks(PART_1_TOTAL_BLINKS).toString()
     }
 
     /**
@@ -83,31 +83,45 @@ internal class Day11 {
      * How many stones would you have after blinking a total of 75 times?
      */
     fun solution2(puzzle: String): String {
-        val lines = puzzle.lines().filter { it.isNotEmpty() }
-        return ""
+        return puzzle
+            .split(" ").map { it.toLong() }
+            .blinks(PART_2_TOTAL_BLINKS).toString()
     }
 
-    private fun List<Long>.blinks(): List<Long> {
-        var currentStones = this
-        repeat(PART_1_TOTAL_BLINKS) {
-            currentStones = currentStones.flatMap { stone ->
+    private fun List<Long>.blinks(count: Int): Long {
+        var currentStones: MutableMap<Long, Long> = this.groupBy { it }
+            .map { it.key to it.value.size.toLong() }
+            .associate { it.first to it.second }
+            .toMutableMap()
+        repeat(count) {
+            val map = mutableMapOf<Long, Long>()
+            currentStones.keys.forEach { stone ->
                 when {
-                    stone == 0L -> listOf(1L)
+                    stone == 0L -> {
+                        map[1] =  map.getOrDefault(1, 0)+currentStones[0L]!!
+                    }
                     stone.toString().length % 2 == 0 -> {
                         val digits = stone.toString()
                         val mid = digits.length / 2
                         val left = digits.substring(0, mid).toLong()
                         val right = digits.substring(mid).toLong()
-                        listOf(left, right)
+                        map[left] = map.getOrDefault(left, 0) + currentStones[stone]!!
+                        map[right] = map.getOrDefault(right, 0) + currentStones[stone]!!
                     }
-                    else -> listOf(stone * 2024)
+
+                    else -> {
+                        map[stone * 2024] = map.getOrDefault(stone * 2024, 0) + currentStones[stone]!!
+                    }
                 }
             }
+            println("After ${it + 1} blinks: $map")
+            currentStones = map
         }
-        return currentStones
+        return currentStones.keys.sumOf { currentStones[it]!!.toLong() }
     }
 
     companion object {
         private const val PART_1_TOTAL_BLINKS = 25
+        private const val PART_2_TOTAL_BLINKS = 75
     }
 }
