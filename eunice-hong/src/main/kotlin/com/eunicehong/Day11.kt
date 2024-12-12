@@ -69,16 +69,45 @@ internal class Day11 {
      *
      */
     fun solution1(puzzle: String): String {
-        val lines = puzzle.lines().filter { it.isNotEmpty() }
-        return ""
+        return puzzle
+            .split(" ").map { it.toLong() }
+            .blinks().count().toString()
     }
 
     /**
      * ## Part 2
      *
+     *
+     * The Historians sure are taking a long time. To be fair, the infinite corridors are very large.
+     *
+     * How many stones would you have after blinking a total of 75 times?
      */
     fun solution2(puzzle: String): String {
         val lines = puzzle.lines().filter { it.isNotEmpty() }
         return ""
+    }
+
+    private fun List<Long>.blinks(): List<Long> {
+        var currentStones = this
+        repeat(PART_1_TOTAL_BLINKS) {
+            currentStones = currentStones.flatMap { stone ->
+                when {
+                    stone == 0L -> listOf(1L)
+                    stone.toString().length % 2 == 0 -> {
+                        val digits = stone.toString()
+                        val mid = digits.length / 2
+                        val left = digits.substring(0, mid).toLong()
+                        val right = digits.substring(mid).toLong()
+                        listOf(left, right)
+                    }
+                    else -> listOf(stone * 2024)
+                }
+            }
+        }
+        return currentStones
+    }
+
+    companion object {
+        private const val PART_1_TOTAL_BLINKS = 25
     }
 }
