@@ -173,8 +173,25 @@ internal class Day14 {
      *
      */
     fun solution2(puzzle: String): String {
-        val lines = puzzle.lines().filter { it.isNotEmpty() }
-        return ""
+        val robots =
+            puzzle
+                .lines()
+                .filter { it.isNotEmpty() }
+                .getRobots()
+        val width = robots.maxOf { it.x } + 1
+        val height = robots.maxOf { it.y } + 1
+        return (0 until Int.MAX_VALUE)
+            .first { time ->
+                if (time % 1000 == 0) println(time)
+                robots
+                    .asSequence()
+                    .map { it.move(width, height, time) }
+                    .groupBy { it.x to it.y }
+                    .asSequence()
+                    .map { it.key to it.value.size }
+                    // Check if all robots are in a unique position
+                    .all { (_, robots) -> robots <= 1 }
+            }.toString()
     }
 
     private val digitRegex = Regex("""-?\d+""")
