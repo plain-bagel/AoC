@@ -143,16 +143,63 @@ internal class Day14 {
      * Predict the motion of the robots in your list within a space which is 101 tiles wide and 103 tiles tall. What will the safety factor be after exactly 100 seconds have elapsed?
      */
     fun solution1(puzzle: String): String {
-        val lines = puzzle.lines().filter { it.isNotEmpty() }
-        return ""
+        val robots =
+            puzzle
+                .lines()
+                .filter { it.isNotEmpty() }
+                .getRobots()
+        val width = robots.maxOf { it.x } + 1
+        val height = robots.maxOf { it.y } + 1
+        return robots
+            .asSequence()
+            .map { it.move(width, height, 100) }
+            .groupBy { it.x to it.y }
+            .asSequence()
+            .map { it.key to it.value.size }
+            .filter { (position, _) -> position.first != (width / 2) && position.second != (height / 2) }
+            .groupBy { (position, _) -> (position.first < (width / 2)) to (position.second < (height / 2)) }
+            .map { (quadrant, robots) -> quadrant to robots.sumOf { it.second } }
+            .fold(1) { acc, (_, count) -> acc * count }
+            .toString()
     }
 
     /**
      * ## Part 2
      *
+     * During the bathroom break, someone notices that these robots seem awfully similar to ones built and used at the North Pole. If they're the same type of robots, they should have a hard-coded Easter egg: very rarely, most of the robots should arrange themselves into a picture of a Christmas tree.
+     *
+     * What is the fewest number of seconds that must elapse for the robots to display the Easter egg?
+     *
+     *
      */
     fun solution2(puzzle: String): String {
         val lines = puzzle.lines().filter { it.isNotEmpty() }
         return ""
+    }
+
+    private val digitRegex = Regex("""-?\d+""")
+
+    private fun List<String>.getRobots(): List<Robot> =
+        map { line ->
+            val (x, y, vx, vy) = digitRegex.findAll(line).map { it.value.toInt() }.toList()
+            Robot(x, y, vx, vy)
+        }
+
+    private data class Robot(
+        val x: Int,
+        val y: Int,
+        val vx: Int,
+        val vy: Int,
+    ) {
+        fun move(
+            width: Int,
+            height: Int,
+            times: Int,
+        ): Robot =
+            (0 until times).fold(this) { robot, _ ->
+                val x = (robot.x + robot.vx + width) % width
+                val y = (robot.y + robot.vy + height) % height
+                Robot(x, y, robot.vx, robot.vy)
+            }
     }
 }
