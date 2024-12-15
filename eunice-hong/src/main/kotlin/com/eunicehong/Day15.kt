@@ -257,16 +257,292 @@ internal class Day15 {
      * Predict the motion of the robot and boxes in the warehouse. After the robot is finished moving, what is the sum of all boxes' GPS coordinates?
      */
     fun solution1(puzzle: String): String {
-        val lines = puzzle.lines().filter { it.isNotEmpty() }
-        return ""
+        val (mapSrc, directionsSrc) = puzzle.split("\n\n")
+        val initialWareHouse = WareHouse(mapSrc.lines().filter { it.isNotEmpty() })
+        return directionsSrc
+            .map { char -> Direction.entries.first { it.value == char } }
+            .fold(initialWareHouse) { acc, direction ->
+                acc.move(direction)
+            }.let { map ->
+                map.getBoxes().sumOf { it.x + it.y * 100 }
+            }.toString()
     }
 
     /**
      * ## Part 2
      *
+     * The lanternfish use your information to find a safe moment to swim in and turn off the malfunctioning robot! Just as they start preparing a festival in your honor, reports start coming in that a second warehouse's robot is also malfunctioning.
+     *
+     * This warehouse's layout is surprisingly similar to the one you just helped. There is one key difference: everything except the robot is twice as wide! The robot's list of movements doesn't change.
+     *
+     * To get the wider warehouse's map, start with your original map and, for each tile, make the following changes:
+     *
+     * If the tile is #, the new map contains ## instead.
+     * If the tile is O, the new map contains [] instead.
+     * If the tile is ., the new map contains .. instead.
+     * If the tile is @, the new map contains @. instead.
+     * This will produce a new warehouse map which is twice as wide and with wide boxes that are represented by []. (The robot does not change size.)
+     *
+     * The larger example from before would now look like this:
+     *
+     * ```
+     * ####################
+     * ##....[]....[]..[]##
+     * ##............[]..##
+     * ##..[][]....[]..[]##
+     * ##....[]@.....[]..##
+     * ##[]##....[]......##
+     * ##[]....[]....[]..##
+     * ##..[][]..[]..[][]##
+     * ##........[]......##
+     * ####################
+     * ```
+     * Because boxes are now twice as wide but the robot is still the same size and speed, boxes can be aligned such that they directly push two other boxes at once. For example, consider this situation:
+     *
+     * ```
+     * #######
+     * #...#.#
+     * #.....#
+     * #..OO@#
+     * #..O..#
+     * #.....#
+     * #######
+     *
+     * <vv<<^^<<^^
+     * ```
+     * After appropriately resizing this map, the robot would push around these boxes as follows:
+     *
+     * ```
+     * Initial state:
+     * ##############
+     * ##......##..##
+     * ##..........##
+     * ##....[][]@.##
+     * ##....[]....##
+     * ##..........##
+     * ##############
+     *
+     * Move <:
+     * ##############
+     * ##......##..##
+     * ##..........##
+     * ##...[][]@..##
+     * ##....[]....##
+     * ##..........##
+     * ##############
+     *
+     * Move v:
+     * ##############
+     * ##......##..##
+     * ##..........##
+     * ##...[][]...##
+     * ##....[].@..##
+     * ##..........##
+     * ##############
+     *
+     * Move v:
+     * ##############
+     * ##......##..##
+     * ##..........##
+     * ##...[][]...##
+     * ##....[]....##
+     * ##.......@..##
+     * ##############
+     *
+     * Move <:
+     * ##############
+     * ##......##..##
+     * ##..........##
+     * ##...[][]...##
+     * ##....[]....##
+     * ##......@...##
+     * ##############
+     *
+     * Move <:
+     * ##############
+     * ##......##..##
+     * ##..........##
+     * ##...[][]...##
+     * ##....[]....##
+     * ##.....@....##
+     * ##############
+     *
+     * Move ^:
+     * ##############
+     * ##......##..##
+     * ##...[][]...##
+     * ##....[]....##
+     * ##.....@....##
+     * ##..........##
+     * ##############
+     *
+     * Move ^:
+     * ##############
+     * ##......##..##
+     * ##...[][]...##
+     * ##....[]....##
+     * ##.....@....##
+     * ##..........##
+     * ##############
+     *
+     * Move <:
+     * ##############
+     * ##......##..##
+     * ##...[][]...##
+     * ##....[]....##
+     * ##....@.....##
+     * ##..........##
+     * ##############
+     *
+     * Move <:
+     * ##############
+     * ##......##..##
+     * ##...[][]...##
+     * ##....[]....##
+     * ##...@......##
+     * ##..........##
+     * ##############
+     *
+     * Move ^:
+     * ##############
+     * ##......##..##
+     * ##...[][]...##
+     * ##...@[]....##
+     * ##..........##
+     * ##..........##
+     * ##############
+     *
+     * Move ^:
+     * ##############
+     * ##...[].##..##
+     * ##...@.[]...##
+     * ##....[]....##
+     * ##..........##
+     * ##..........##
+     * ##############
+     * ```
+     * This warehouse also uses GPS to locate the boxes. For these larger boxes, distances are measured from the edge of the map to the closest edge of the box in question. So, the box shown below has a distance of 1 from the top edge of the map and 5 from the left edge of the map, resulting in a GPS coordinate of 100 * 1 + 5 = 105.
+     *
+     * ```
+     * ##########
+     * ##...[]...
+     * ##........
+     * ```
+     * In the scaled-up version of the larger example from above, after the robot has finished all of its moves, the warehouse would look like this:
+     *
+     * ```
+     * ####################
+     * ##[].......[].[][]##
+     * ##[]...........[].##
+     * ##[]........[][][]##
+     * ##[]......[]....[]##
+     * ##..##......[]....##
+     * ##..[]............##
+     * ##..@......[].[][]##
+     * ##......[][]..[]..##
+     * ####################
+     * ```
+     * The sum of these boxes' GPS coordinates is 9021.
+     *
+     * Predict the motion of the robot and boxes in this new, scaled-up warehouse. What is the sum of all boxes' final GPS coordinates?
      */
     fun solution2(puzzle: String): String {
         val lines = puzzle.lines().filter { it.isNotEmpty() }
         return ""
+    }
+
+    private data class WareHouse(
+        private val input: List<String>,
+    ) {
+        private val map = input.map { it.toCharArray() }.toMutableList()
+
+        val robot: Position
+            get() =
+                (0 until map.size * map[0].size)
+                    .map { index ->
+                        val (x, y) = Pair(index % map[0].size, index / map[0].size)
+                        Position(x, y)
+                    }.first { position ->
+                        map[position.y][position.x] == '@'
+                    }
+
+        override fun toString(): String = map.joinToString("\n") { it.joinToString("") }
+
+        fun move(direction: Direction): WareHouse {
+            var currentPosition = robot
+            while (true) {
+                val newPosition = currentPosition.getNextPosition(direction)
+                when (map[currentPosition.y][currentPosition.x]) {
+                    '@' ->
+                        when (map[newPosition.y][newPosition.x]) {
+                            '#' -> break
+                            'O' -> {
+                                currentPosition = newPosition
+                                continue
+                            }
+                            else -> {
+                                map[currentPosition.y][currentPosition.x] = '.'
+                                map[newPosition.y][newPosition.x] = '@'
+                                break
+                            }
+                        }
+                    'O' ->
+                        when (map[newPosition.y][newPosition.x]) {
+                            '#' -> break
+                            'O' -> {
+                                currentPosition = newPosition
+                                continue
+                            }
+                            else -> {
+                                map[currentPosition.y][currentPosition.x] = '.'
+                                map[newPosition.y][newPosition.x] = 'O'
+                                currentPosition = currentPosition.getPrevPosition(direction)
+                                continue
+                            }
+                        }
+                    else -> return this
+                }
+            }
+            return this
+        }
+
+        fun getBoxes(): List<Position> =
+            (0 until map.size * map[0].size)
+                .map { index ->
+                    val (x, y) = Pair(index % map[0].size, index / map[0].size)
+                    Position(x, y)
+                }.filter { position ->
+                    map[position.y][position.x] == 'O'
+                }
+    }
+
+    private enum class Direction(
+        val value: Char,
+    ) {
+        UP('^'),
+        DOWN('v'),
+        LEFT('<'),
+        RIGHT('>'),
+    }
+
+    private data class Position(
+        val x: Int,
+        val y: Int,
+    ) {
+        fun getNextPosition(direction: Direction): Position =
+            when (direction) {
+                Direction.UP -> copy(y = y - 1)
+                Direction.DOWN -> copy(y = y + 1)
+                Direction.LEFT -> copy(x = x - 1)
+                Direction.RIGHT -> copy(x = x + 1)
+            }
+
+        fun getPrevPosition(direction: Direction): Position =
+            when (direction) {
+                Direction.UP -> copy(y = y + 1)
+                Direction.DOWN -> copy(y = y - 1)
+                Direction.LEFT -> copy(x = x + 1)
+                Direction.RIGHT -> copy(x = x - 1)
+            }
     }
 }
